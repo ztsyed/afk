@@ -1,6 +1,8 @@
 # AFK - Away From Keyboard
 
-**A mobile approval gateway for Claude Code**
+**Zero-latency notifications for high-latency humans**
+
+A mobile approval gateway for Claude Code.
 
 In the age of agentic coding with Claude Code, running multiple agents simultaneously across different projects has become the norm. But there's a bottleneck: **you**. When three agents need approval at once and you're grabbing coffee, making lunch, or just stepped away from your desk, everything grinds to a halt.
 
