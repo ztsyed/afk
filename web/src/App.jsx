@@ -231,12 +231,12 @@ function SessionDetail({ session, onBack, onRespond, sending }) {
   const isPermissionPrompt = session.notification_type === 'permission_prompt'
 
   // Different quick responses based on prompt type
+  // Claude Code permission options: 1=Yes, 2=Yes always, 3=No
   const quickResponses = isPermissionPrompt
     ? [
         { label: 'Yes', value: 'yes' },
-        { label: 'No', value: 'no' },
-        { label: 'Continue', value: 'continue' },
-        { label: 'Stop', value: 'stop' }
+        { label: 'Always', value: 'always' },
+        { label: 'No', value: 'no' }
       ]
     : [] // No quick responses for text input prompts
 
@@ -318,7 +318,7 @@ function SessionDetail({ session, onBack, onRespond, sending }) {
 
         {/* Quick responses - only for permission prompts */}
         {quickResponses.length > 0 && (
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {quickResponses.map(({ label, value }) => (
               <button
                 key={value}

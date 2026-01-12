@@ -56,9 +56,52 @@ def get_project_name():
     return os.path.basename(cwd)
 
 
-def parse_response_to_keys(response):
+def parse_menu_options(context):
+    """
+    Parse menu options from the context to build a mapping of intents to option numbers.
+
+    Returns a dict like: {"yes": "1", "no": "2", "always": "2"}
+    """
+    import re
+
+    if not context:
+        return {}
+
+    options = {}
+
+    # Pattern to match menu options like "❯ 1. Yes" or "  2. No, cancel" or "3. Type something"
+    # The ❯ indicates the currently selected option
+    pattern = r'[❯\s]*(\d)\.\s*(.+?)(?:\n|$)'
+
+    matches = re.findall(pattern, context)
+    debug(f"Found menu options: {matches}")
+
+    for num, text in matches:
+        text_lower = text.lower().strip()
+
+        # Detect "yes" options
+        if text_lower.startswith('yes') or 'allow' in text_lower or 'create' in text_lower or 'proceed' in text_lower:
+            if 'always' in text_lower or "don't ask" in text_lower or 'never ask' in text_lower:
+                options["always"] = num
+            else:
+                options["yes"] = num
+
+        # Detect "no" options
+        elif text_lower.startswith('no') or 'cancel' in text_lower or 'deny' in text_lower or 'reject' in text_lower:
+            options["no"] = num
+
+        # Detect "type something" / custom input option
+        elif 'type' in text_lower or 'custom' in text_lower or 'other' in text_lower:
+            options["type"] = num
+
+    debug(f"Parsed options mapping: {options}")
+    return options
+
+
+def parse_response_to_keys(response, context=None):
     """
     Smart detection: convert response to appropriate tmux key sequence.
+    Uses context to determine correct menu option numbers when available.
 
     Returns a list of keys/strings to send to tmux send-keys.
     """
@@ -72,12 +115,29 @@ def parse_response_to_keys(response):
     if response in "123456789":
         return [response]
 
-    # "yes" or "y" -> send "1" (first menu option is typically Yes)
+    # Try to parse menu options from context for smart mapping
+    menu_options = parse_menu_options(context) if context else {}
+
+    # Map yes/no/always to actual menu option numbers
     if response.lower() in ("y", "yes"):
+        if "yes" in menu_options:
+            debug(f"Mapped 'yes' to option {menu_options['yes']} from context")
+            return [menu_options["yes"]]
+        # Fallback to standard Claude Code permission prompt (1 = Yes)
         return ["1"]
 
-    # "no" or "n" -> send "2" (second menu option is typically No)
     if response.lower() in ("n", "no"):
+        if "no" in menu_options:
+            debug(f"Mapped 'no' to option {menu_options['no']} from context")
+            return [menu_options["no"]]
+        # Fallback to standard Claude Code permission prompt (3 = No)
+        return ["3"]
+
+    if response.lower() in ("always", "yes always", "yes, always"):
+        if "always" in menu_options:
+            debug(f"Mapped 'always' to option {menu_options['always']} from context")
+            return [menu_options["always"]]
+        # Fallback to standard Claude Code permission prompt (2 = Yes, always)
         return ["2"]
 
     # Special key names (case-insensitive) -> send as tmux key
@@ -241,7 +301,7 @@ def capture_tmux_pane(tmux_pane=None, lines=30):
     return None
 
 
-def send_to_tmux(response, notification_type="permission_prompt"):
+def send_to_tmux(response, notification_type="permission_prompt", context=None):
     """Send response to the current tmux pane with smart key detection."""
     debug(f"send_to_tmux called with: {response}, notification_type: {notification_type}")
 
@@ -255,7 +315,7 @@ def send_to_tmux(response, notification_type="permission_prompt"):
     # For permission prompts, use smart key parsing (yes→1, no→2, etc.)
     # For idle prompts (text input), just send the text as-is + Enter
     if notification_type == "permission_prompt":
-        keys = parse_response_to_keys(response)
+        keys = parse_response_to_keys(response, context)
         debug(f"Parsed keys: {keys}")
         # Send all keys in one command
         cmd = ["tmux", "send-keys"] + pane_args + keys
@@ -407,7 +467,7 @@ def main():
                         signal.alarm(0)
 
                         if in_tmux:
-                            success = send_to_tmux(response, notification_type)
+                            success = send_to_tmux(response, notification_type, context_tail)
                             debug(f"send_to_tmux result: {success}")
                             if success:
                                 sys.exit(0)
