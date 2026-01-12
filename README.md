@@ -1,4 +1,4 @@
-# AFK - Away From Keyboard
+# AFK: Awaiting Fleshy Keypress
 
 **Zero-latency notifications for high-latency humans**
 
