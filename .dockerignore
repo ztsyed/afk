@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Node
+web/node_modules
+web/.vite
+
+# Python
+server/venv
+server/__pycache__
+**/__pycache__
+*.pyc
+*.pyo
+
+# Database
+*.db
+*.sqlite
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Kubernetes
+k8s/
+
+# Scripts
+scripts/
+
+# Documentation
+README.md
+*.md
+
+# Test files
+test_*.py
+*_test.py

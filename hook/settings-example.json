@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "~/.claude/hooks/afk.py",
+            "timeout": 3600
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  @apply bg-terminal-bg text-gray-100 font-mono antialiased;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-terminal-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-terminal-border rounded;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-terminal-muted;
+}
+
+/* Pulsing animation for pending status */
+@keyframes pulse-amber {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.pulse-amber {
+  animation: pulse-amber 2s ease-in-out infinite;
+}
+
+/* Scan line effect */
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
+}
+
+.scanline::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(0, 255, 65, 0.1),
+    transparent
+  );
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Terminal cursor blink */
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink::after {
+  content: '_';
+  animation: blink 1s step-end infinite;
+}
+
+/* Button hover effects */
+.btn-terminal {
+  @apply px-4 py-2 border border-terminal-green text-terminal-green
+         font-mono text-sm uppercase tracking-wider
+         transition-all duration-150 ease-out
+         active:scale-95;
+}
+
+.btn-terminal:hover {
+  @apply bg-terminal-green text-terminal-bg;
+}
+
+.btn-terminal:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+.btn-terminal:disabled:hover {
+  @apply bg-transparent text-terminal-green;
+}
+
+/* Card styling */
+.card-terminal {
+  @apply bg-terminal-surface border border-terminal-border p-4;
+}
+
+/* Status indicators */
+.status-dot {
+  @apply w-2 h-2 rounded-full;
+}
+
+.status-connected {
+  @apply bg-terminal-green;
+}
+
+.status-pending {
+  @apply bg-terminal-amber pulse-amber;
+}
+
+.status-disconnected {
+  @apply bg-terminal-red;
+}
+
+/* Input styling */
+.input-terminal {
+  @apply w-full bg-terminal-bg border border-terminal-border
+         px-3 py-2 text-gray-100 font-mono text-sm
+         focus:outline-none focus:border-terminal-green
+         placeholder:text-terminal-muted;
+}
+
+textarea.input-terminal {
+  @apply resize-none;
+}

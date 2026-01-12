@@ -1,0 +1,75 @@
+# Default values for afk
+
+replicaCount: 1
+
+image:
+  repository: ztsyed/afk
+  pullPolicy: Always
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: false
+  name: ""
+
+podSecurityContext:
+  fsGroup: 1000
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    # WebSocket support
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+    nginx.ingress.kubernetes.io/upstream-hash-by: "$binary_remote_addr"
+  hosts:
+    - host: afk.ziasyed.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: afk-tls
+      hosts:
+        - afk.ziasyed.com
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+persistence:
+  enabled: true
+  storageClass: "local-path"
+  size: 1Gi
+  accessMode: ReadWriteOnce
+
+env:
+  NTFY_TOPIC: "zs_afk"
+  NTFY_SERVER: "https://ntfy.sh"
+  AFK_BASE_URL: "https://afk.ziasyed.com"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
